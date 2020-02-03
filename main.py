@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from file_proc import read_file
+from file_proc import read_file, write_file
 
 app = Flask(__name__)
 
@@ -33,6 +33,22 @@ def readFromFile():
   content = read_file()
   return content
 
+@app.route('/write_to_file', methods = ['POST'])
+def writeToFile():
+  request_type = request.content_type
+  if(request_type == "application/json"):
+    contentJSON = request.get_json()
+    write_file(contentJSON['data'])
+    return contentJSON
+  else:
+    return f"Request type '{request_type} not supported!"
+  
+@app.route('/file', methods = ['POST', 'GET'])
+def fileWork():
+  if request.method == 'GET':
+    return readFromFile()
+  elif request.method == 'POST':
+    return writeToFile()
 
 if __name__ == '__main__':
   app.run(host = '0.0.0.0', port = 5211, threaded = True, debug = True)
